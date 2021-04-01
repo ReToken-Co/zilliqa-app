@@ -1,0 +1,20 @@
+{
+  "files": {
+    "main.css": "/zilliqa-app/static/css/main.9d5b29c0.chunk.css",
+    "main.js": "/zilliqa-app/static/js/main.47f6206c.chunk.js",
+    "main.js.map": "/zilliqa-app/static/js/main.47f6206c.chunk.js.map",
+    "runtime-main.js": "/zilliqa-app/static/js/runtime-main.051b16cb.js",
+    "runtime-main.js.map": "/zilliqa-app/static/js/runtime-main.051b16cb.js.map",
+    "static/js/2.4526c4f8.chunk.js": "/zilliqa-app/static/js/2.4526c4f8.chunk.js",
+    "static/js/2.4526c4f8.chunk.js.map": "/zilliqa-app/static/js/2.4526c4f8.chunk.js.map",
+    "index.html": "/zilliqa-app/index.html",
+    "static/css/main.9d5b29c0.chunk.css.map": "/zilliqa-app/static/css/main.9d5b29c0.chunk.css.map",
+    "static/js/2.4526c4f8.chunk.js.LICENSE.txt": "/zilliqa-app/static/js/2.4526c4f8.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.051b16cb.js",
+    "static/js/2.4526c4f8.chunk.js",
+    "static/css/main.9d5b29c0.chunk.css",
+    "static/js/main.47f6206c.chunk.js"
+  ]
+}
