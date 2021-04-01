@@ -1,0 +1,32 @@
+"code": "",
+    "data": "{\"_tag\":\"registerHouse\",\"params\":[{\"vname\":\"streetAddr\",\"type\":\"String\",\"value\":\"zilliqa front end\"},{\"vname\":\"rentAmt\",\"type\":\"Uint128\",\"value\":10000000000000000}]}",
+    "version": 21823489,
+    "toAddr": "0x310D85E756C14f02b39821695013F28F3b7F7701",
+    "nonce": 22,
+    "pubKey": "02a7a3ff06cbc9fcd8087abc7e3a592c705995330b19d8c1f3ed79ccb32bae4100",
+    "amount": "0",
+    "signature": "8c5aaf039f864933fdf07cd09aedf63f5fe449a812e96a142e225f7342680b23f7306b2050079bb14cda4a9d678b5a4c26ef96c98202decf66c289a29a118d15",
+    "gasPrice": "3b9aca00",
+    "gasLimit": {
+        "low": 10000,
+        "high": 0,
+        "unsigned": false
+    },
+    "provider": {
+        "middleware": {
+            "request": {},
+            "response": {}
+        },
+        "nodeURL": "https://dev-api.zilliqa.com",
+        "reqMiddleware": {},
+        "resMiddleware": {}
+    },
+    "status": 3,
+    "toDS": false,
+    "blockConfirmation": 0,
+    "eventEmitter": {
+        "handlers": {},
+        "emitter": {},
+        "promise": {}
+    }
+}

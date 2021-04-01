@@ -1,0 +1,22 @@
+{
+  "code": "",
+  "data": "{\"_tag\":\"registerHouse\",\"params\":[{\"vname\":\"streetAddr\",\"type\":\"String\",\"value\":\"222 Dover Road\"},{\"vname\":\"rentAmt\",\"type\":\"Uint128\",\"value\":10000000000000000}]}",
+  "version": 21823489,
+  "toAddr": "0xBE5bE2c433DfF58f67261d50857Daa95AC244046",
+  "nonce": 19,
+  "pubKey": "02a7a3ff06cbc9fcd8087abc7e3a592c705995330b19d8c1f3ed79ccb32bae4100",
+  "amount": "0",
+  "signature": "1372f280a815cb7c740c2a362c89374674081a34543696d5e01e2532d90eaf19ab7b0b86efbf0c085588e19bfd87e7d5abcdc7d4cb7a411c60424011d70fb1d7",
+  "gasPrice": "3b9aca00",
+  "gasLimit": { "low": 10000, "high": 0, "unsigned": false },
+  "provider": {
+    "middleware": { "request": {}, "response": {} },
+    "nodeURL": "https://dev-api.zilliqa.com",
+    "reqMiddleware": {},
+    "resMiddleware": {}
+  },
+  "status": 3,
+  "toDS": false,
+  "blockConfirmation": 0,
+  "eventEmitter": { "handlers": {}, "emitter": {}, "promise": {} }
+}

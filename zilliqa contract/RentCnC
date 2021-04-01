@@ -1,0 +1,335 @@
+(* AirBnB OnChain Example Contract - deployed at 0xcb45810cae7690f9ab50d5ad350cc1e62e6cd58a *)
+
+(***************************************************)
+(*                 Scilla version                  *)
+(***************************************************)
+
+scilla_version 0
+
+(***************************************************)
+(*               Associated library                *)
+(***************************************************)
+library RentCnC
+
+let zero = Uint32 0
+let one = Uint32 1
+
+let one_msg =
+  fun (msg: Message) =>
+  let nil_msg = Nil {Message} in
+  Cons {Message} msg nil_msg
+
+(* error codes library *)
+let code_success = Uint32 0
+let code_house_not_found = Uint32 1
+let code_house_already_rented = Uint32 2
+let code_rent_amt_wrong = Uint32 3
+let code_none_value_found = Uint32 4
+let code_no_balance_found = Uint32 5
+let code_not_landlord = Uint32 6
+let code_not_booker = Uint32 7
+
+(***************************************************)
+(*             The contract definition             *)
+(***************************************************)
+contract RentCnC()
+
+(* currentID will store the latest House ID *)
+field lastHouseID: Uint32 = Uint32 0
+
+(* house*** will store a Map of id to landlord, to streetAddr, to rentAmt, to status *)
+field houseLandlord: Map Uint32 ByStr20 = Emp Uint32 ByStr20
+field houseStreetAddr: Map Uint32 String = Emp Uint32 String
+field houseRentAmt: Map Uint32 Uint128 = Emp Uint32 Uint128
+field houseStatus: Map Uint32 Uint32 = Emp Uint32 Uint32
+
+(* balance will store a Map of landlord to balance in contract *)
+field balance: Map ByStr20 Uint128 = Emp ByStr20 Uint128
+
+field booking: Map Uint32 ByStr20 = Emp Uint32 ByStr20
+field bookAmt: Map Uint32 Uint128 = Emp Uint32 Uint128
+
+(* ======== transitions ===============*)
+
+transition registerHouse(streetAddr : String, rentAmt : Uint128)
+
+  currentID <- lastHouseID;
+
+  newID = builtin add currentID one;
+  
+  houseLandlord[newID] := _sender;
+  houseStreetAddr[newID] := streetAddr;
+  houseRentAmt[newID] := rentAmt;
+  houseStatus[newID] := zero;
+  
+  lastHouseID := newID;
+
+  msg = {_tag: ""; 
+          _recipient: _sender; 
+          _amount: Uint128 0; 
+          code: code_success};
+  msgs = one_msg msg;
+  send msgs
+end
+
+
+transition updateHouse(id : Uint32, streetAddr : String, rentAmt : Uint128)
+
+    landLord <- houseLandlord[id];
+    match landLord with
+    | None =>
+        msg = {_tag: "";
+                _recipient: _sender;
+                _amount: Uint128 0;
+                code: code_none_value_found};
+        msgs = one_msg msg;
+        send msgs
+
+    | Some someLandlord =>
+        checkLandlord = builtin eq someLandlord _sender;
+
+        match checkLandlord with
+        | True =>
+            houseStreetAddr[id] := streetAddr;
+            houseRentAmt[id] := rentAmt;
+
+            msg = {_tag: ""; 
+                    _recipient: _sender; 
+                    _amount: Uint128 0; 
+                    code: code_success};
+            msgs = one_msg msg;
+            send msgs
+
+        | False =>
+            msg = {_tag: "";
+                    _recipient: _sender;
+                    _amount: Uint128 0;
+                    code: code_not_landlord};
+            msgs = one_msg msg;
+            send msgs
+        end
+    end
+end
+
+
+transition rentHouse(id : Uint32)
+
+  status <- houseStatus;
+  houseExist = builtin contains status id;
+  
+  match houseExist with
+  | True =>
+      checkStatus <- houseStatus[id];
+      
+      match checkStatus with
+      | None =>
+          msg = {_tag: "";
+                  _recipient: _sender;
+                  _amount: Uint128 0;
+                  code: code_none_value_found};
+          msgs = one_msg msg;
+          send msgs
+        
+      | Some someStatus =>
+        statusOne = builtin eq someStatus one;
+
+        match statusOne with
+          | True =>
+            msg = {_tag: "";
+                    _recipient: _sender;
+                    _amount: Uint128 0;
+                    code: code_house_already_rented};
+            msgs = one_msg msg;
+            send msgs
+          
+          | False =>
+            rentAmt <- houseRentAmt[id];
+          
+            match rentAmt with
+            | None =>
+              msg = {_tag: "";
+                      _recipient: _sender;
+                      _amount: Uint128 0;
+                      code: code_none_value_found};
+              msgs = one_msg msg;
+              send msgs 
+              
+            | Some someAmt =>
+              sentAmt = _amount;
+              rentCorrect = builtin eq someAmt sentAmt;
+  
+              match rentCorrect with
+              | True =>
+                accept;
+                houseStatus[id] := one;
+                booking[id] := _sender;
+                bookAmt[id] := _amount;
+            
+                landlord <- houseLandlord[id];
+                
+                match landlord with
+                | None =>
+                  msg = {_tag: "";
+                          _recipient: _sender;
+                          _amount: Uint128 0;
+                          code: code_none_value_found};
+                  msgs = one_msg msg;
+                  send msgs 
+                  
+                | Some someLandlord =>
+                  currentBal <- balance[someLandlord];
+                  
+                  match currentBal with
+                  | None =>
+                      balance[someLandlord] := sentAmt;
+                      
+                      msg = {_tag: "";
+                              _recipient: _sender;
+                              _amount: Uint128 0;
+                              code: code_success};
+                      msgs = one_msg msg;
+                      send msgs 
+                    
+                  | Some someBal =>
+                      newBal = builtin add someBal sentAmt;
+                      balance[someLandlord] := newBal;
+            
+                      msg = {_tag: ""; 
+                              _recipient: _sender; 
+                              _amount: Uint128 0; 
+                              code: code_success};
+                      msgs = one_msg msg;
+                      send msgs
+                  end
+                end
+          
+              | False =>
+                  msg = {_tag: "";
+                          _recipient: _sender;
+                          _amount: Uint128 0;
+                          code: code_rent_amt_wrong};
+                  msgs = one_msg msg;
+                  send msgs
+              end
+            end
+        end
+      end
+      
+  | False =>
+      msg = {_tag: "";
+              _recipient: _sender;
+              _amount: Uint128 0;
+              code: code_house_not_found};
+      msgs = one_msg msg;
+      send msgs
+  end
+end
+
+
+transition cancelRent(id : Uint32)
+
+    booker <- booking[id];
+    match booker with
+    | None =>
+        msg = {_tag: "";
+                _recipient: _sender;
+                _amount: Uint128 0;
+                code: code_no_balance_found};
+        msgs = one_msg msg;
+        send msgs
+
+    | Some someBooker =>
+        checkBooker = builtin eq someBooker _sender;
+
+        match checkBooker with
+        | True =>
+            refundAmt <- bookAmt[id];
+            match refundAmt with
+            | None =>
+                msg = {_tag: "";
+                        _recipient: _sender;
+                        _amount: Uint128 0;
+                        code: code_no_balance_found};
+                msgs = one_msg msg;
+                send msgs
+
+            | Some someRefundAmt =>
+                houseStatus[id] := zero;
+                delete booking[id];
+                delete bookAmt[id];
+
+                landlord <- houseLandlord[id];
+                
+                match landlord with
+                | None =>
+                  msg = {_tag: "";
+                          _recipient: _sender;
+                          _amount: Uint128 0;
+                          code: code_none_value_found};
+                  msgs = one_msg msg;
+                  send msgs 
+                  
+                | Some someLandlord =>
+                  currentBal <- balance[someLandlord];
+                  
+                  match currentBal with
+                  | None =>
+                      delete balance[someLandlord];
+                      
+                      msg = {_tag: "";
+                              _recipient: _sender;
+                              _amount: someRefundAmt;
+                              code: code_success};
+                      msgs = one_msg msg;
+                      send msgs 
+                    
+                  | Some someBal =>
+                      newBal = builtin sub someBal someRefundAmt;
+                      balance[someLandlord] := newBal;
+            
+                      msg = {_tag: ""; 
+                              _recipient: _sender; 
+                              _amount: someRefundAmt; 
+                              code: code_success};
+                      msgs = one_msg msg;
+                      send msgs
+                  end
+                end
+            end
+        
+        | False =>
+            msg = {_tag: "";
+                    _recipient: _sender;
+                    _amount: Uint128 0;
+                    code: code_not_booker};
+            msgs = one_msg msg;
+            send msgs
+        end        
+    end
+end
+
+
+transition withdrawZIL()
+
+    senderBal <- balance[_sender];
+
+    match senderBal with
+    | None =>
+        msg = {_tag: "";
+                _recipient: _sender;
+                _amount: Uint128 0;
+                code: code_no_balance_found};
+        msgs = one_msg msg;
+        send msgs
+
+    | Some someBal =>
+        delete balance[_sender];
+
+        msg = {_tag: ""; 
+        _recipient: _sender; 
+        _amount: someBal; 
+        code: code_success};
+        msgs = one_msg msg;
+        send msgs
+    end
+end
